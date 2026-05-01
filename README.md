@@ -35,6 +35,15 @@ scanners, UPSs, etc.) and forwards it through **Microsoft Graph**
 > mailboxes (`printer@`, `scanner@`, ...). Do this &mdash; the relay's sender
 > allowlist is defense-in-depth but the tenant-side policy is the real fence.
 
+Also strongly consider a Microsoft Entra Conditional Access Policy for the
+app registration / service principal so token acquisition is only allowed
+from expected public IPs, trusted named locations, or approved workload
+identities. This is another tenant-side control: even if the client secret is
+stolen, the attacker should not be able to use it from an arbitrary network.
+Conditional Access for workload identities requires the appropriate Microsoft
+Entra / Microsoft 365 licensing tier (for example, Entra ID Premium features);
+verify your tenant license before relying on this control.
+
 ## 2. Configure the relay
 
 ```bash
@@ -46,8 +55,12 @@ Fill in `azure.tenant_id`, `azure.client_id`, `azure.client_secret` (or leave
 blank and set `AZURE_TENANT_ID` / `AZURE_CLIENT_ID` / `AZURE_CLIENT_SECRET`
 as environment variables in `docker-compose.yml`).
 
-Set `allowed_networks` to the LAN ranges that may submit mail, and
-`allowed_senders` to the device mailboxes you created in step 1.
+Set `allowed_networks` to the specific printer/scanner IPs or tightly scoped
+device VLAN CIDRs that may submit mail, and `allowed_senders` to the device
+mailboxes you created in step 1. **Do not allow the entire LAN unless you
+have a very specific reason.** Any host in `allowed_networks` can submit
+unauthenticated SMTP to the relay, so broad ranges turn one compromised LAN
+machine into a mail-sending foothold.
 
 ## 3. Run it
 
