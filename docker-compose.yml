@@ -1,0 +1,28 @@
+services:
+  smtp-relay:
+    build: .
+    image: smtp-graph-relay:latest
+    container_name: smtp-graph-relay
+    restart: unless-stopped
+    # Publish to an explicit LAN interface in production, e.g. "10.0.0.5:25:25".
+    # Binding 0.0.0.0:25 on the host lets any interface accept connections -
+    # rely on allowed_networks in config.yaml for authorization regardless.
+    ports:
+      - "25:25"
+    # CAP_NET_BIND_SERVICE lets the non-root user in the image bind to :25.
+    cap_add:
+      - NET_BIND_SERVICE
+    volumes:
+      - ./config.yaml:/etc/smtp-relay/config.yaml:ro
+    # Secrets can also be injected here instead of putting them in config.yaml.
+    # environment:
+    #   AZURE_TENANT_ID: "..."
+    #   AZURE_CLIENT_ID: "..."
+    #   AZURE_CLIENT_SECRET: "..."
+    # env_file:
+    #   - .env
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"

@@ -1,0 +1,41 @@
+# SMTP -> Microsoft Graph relay configuration.
+#
+# Secrets (tenant_id, client_id, client_secret) can be supplied EITHER here
+# or via environment variables AZURE_TENANT_ID / AZURE_CLIENT_ID /
+# AZURE_CLIENT_SECRET. Environment variables take precedence when set.
+
+azure:
+  tenant_id: "00000000-0000-0000-0000-000000000000"
+  client_id: "00000000-0000-0000-0000-000000000000"
+  client_secret: "REPLACE_ME"
+
+smtp:
+  host: "0.0.0.0"
+  port: 25
+  hostname: "smtp-relay.internal"
+  # Messages under ~3 MB use Graph /sendMail in one shot; anything larger
+  # goes through the draft + upload-session path (chunked attachments).
+  # This ceiling must stay at or below the tenant's Exchange Online
+  # MaxSendSize, which defaults to 35 MB and can be raised to 150 MB via
+  #   Set-Mailbox <mailbox> -MaxSendSize 150MB
+  max_message_size: 36700160   # 35 MB
+
+# LAN IPs / CIDR blocks allowed to submit mail. Anything not listed is rejected
+# at MAIL FROM / RCPT TO time. Use /32 for a single host.
+allowed_networks:
+  - "10.0.0.0/8"
+  - "192.168.0.0/16"
+  - "172.16.0.0/12"
+  # - "192.0.2.42/32"   # one specific printer
+
+# Envelope-From and Header-From must both match one of these entries.
+# Supports exact addresses or a simple "*@domain.com" wildcard.
+allowed_senders:
+  - "printer@contoso.com"
+  - "scanner@contoso.com"
+  # - "*@devices.contoso.com"
+
+# If true, messages will also land in the sender mailbox's Sent Items folder.
+save_to_sent_items: false
+
+log_level: "INFO"
