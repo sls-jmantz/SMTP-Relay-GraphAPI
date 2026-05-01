@@ -11,7 +11,7 @@ scanners, UPSs, etc.) and forwards it through **Microsoft Graph**
   tokens to babysit.
 - LAN-IP allowlist (CIDR) on the front door, sender allowlist on the way out.
 - Plain SMTP on :25, no auth required from clients &mdash; because your
-  printer from 2007 cannot do STARTTLS.
+  printer/scanner combo device from 2007 cannot do STARTTLS.
 - Raw MIME is forwarded to Graph as-is (base64), so attachments,
   Content-Type, headers etc. are preserved.
 
@@ -43,6 +43,8 @@ stolen, the attacker should not be able to use it from an arbitrary network.
 Conditional Access for workload identities requires the appropriate Microsoft
 Entra / Microsoft 365 licensing tier (for example, Entra ID Premium features);
 verify your tenant license before relying on this control.
+
+The sending address configured in the configuration file must have a license that is capable of sending mail in 365.
 
 ## 2. Configure the relay
 
